@@ -23,6 +23,7 @@ class Irrigation():
         self.log.info('-----------------------------------------------------------------')
         self.start_irrigation()
         self.log.info('job done, have a good day')
+        GPIO.cleanup()
 
 
 
@@ -44,6 +45,7 @@ class Irrigation():
         self.log.debug('start_irrigation')
         #self.log.info(self.conf['tempos'])
         current_day_of_week = datetime.datetime.today().weekday()
+        self.log.debug('current day of the week: ' + str(current_day_of_week))
 
         ls_relays=[]
         try:
@@ -65,8 +67,9 @@ class Irrigation():
                     self.log.info('i will operate here today:')
                     self.log.info(line)
                     GPIO.output(relay, GPIO.HIGH)
-                    sleep(line['duration'])
-            GPIO.cleanup()
+                    sleep(line['duration']*self.conf.time_factor)
+                    GPIO.output(relay, GPIO.LOW)
+
 
         except Exception as err:
             self.log.error('Error while working with gpios')

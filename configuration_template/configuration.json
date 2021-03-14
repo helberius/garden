@@ -2,11 +2,12 @@
 	"repo_conf": "test_will_contain_repo_git",
     "log_file": "log.txt",
     "log_level": 10,
+    "time_factor": 1,
   	"peridiocity_irrigation": [
       {
         "name": "line 1",
         "duration": 5,
-        "days":[1,3,5,7]
+        "days":[1,3,5,6,7]
       },
       {
         "name": "line 2",
@@ -21,7 +22,7 @@
       {
         "name": "line 4",
         "duration": 3,
-        "days":[1,2,3,4,5,6]
+        "days":[1,2,3,4,5,6,7]
       }
     ]
 }
