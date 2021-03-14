@@ -66,9 +66,9 @@ class Irrigation():
                 if current_day_of_week in line['days']:
                     self.log.info('i will operate here today:')
                     self.log.info(line)
-                    GPIO.output(relay, GPIO.HIGH)
+                    GPIO.setup(relay, GPIO.HIGH)
                     sleep(line['duration']*self.conf.time_factor)
-                    GPIO.output(relay, GPIO.LOW)
+                    GPIO.setup(relay, GPIO.LOW)
 
 
         except Exception as err:
