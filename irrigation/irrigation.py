@@ -4,12 +4,14 @@ import logging
 import datetime
 from time import sleep
 import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BOARD)
 from common.configuration import Configuration
 
 class Irrigation():
     conf = None
     logging_file = None
+    ls_relays=[8,10,12,16]
+    
     def __init__(self):
         # print('irrigation')
 
@@ -21,8 +23,11 @@ class Irrigation():
         self.log.info('-----------------------------------------------------------------')
         self.log.info('This is the irrigation module :'  + str(datetime.datetime.now()))
         self.log.info('-----------------------------------------------------------------')
-        self.start_irrigation()
+        self.init_pins()
+        #self.start_irrigation()
         self.log.info('job done, have a good day')
+        self.play_relay_1()
+        self.play_relay_2()
         GPIO.cleanup()
 
 
@@ -40,37 +45,56 @@ class Irrigation():
         self.log.addHandler(fh)
         self.log.addHandler(ch)
 
-
+    def init_pins(self):
+        try:
+            
+            for r in self.ls_relays:
+                GPIO.setup(r, GPIO.OUT)
+                GPIO.output(r, True)
+            
+        except Exception as err:
+            self.log.error('Error while initializing the gpio')
+            self.log.error(repr(err))
+        
     def start_irrigation(self):
         self.log.debug('start_irrigation')
         #self.log.info(self.conf['tempos'])
         current_day_of_week = datetime.datetime.today().weekday()
         self.log.debug('current day of the week: ' + str(current_day_of_week))
 
-        ls_relays=[]
         try:
-            Relay1_GPIO = 12
-            Relay2_GPIO = 7
-            Relay3_GPIO = 8
-            Relay4_GPIO = 25
-            ls_relays=[Relay1_GPIO,Relay2_GPIO,Relay3_GPIO, Relay4_GPIO ]
-        except Exception as err:
-            self.log.error('Error while initializing the gpio')
-            self.log.error(repr(err))
-
-
-        try:
-            for i in range(0,len(self.conf.peridiocity_irrigation)):
+            for i in range(0,len(self.ls_relays)):
                 line = self.conf.peridiocity_irrigation[i]
-                relay = ls_relays[i]
+                relay = self.ls_relays[i]
                 if current_day_of_week in line['days']:
                     self.log.info('i will operate here today:')
                     self.log.info(line)
-                    GPIO.setup(relay, GPIO.HIGH)
+                    GPIO.output(relay, False)
                     sleep(line['duration']*self.conf.time_factor)
-                    GPIO.setup(relay, GPIO.LOW)
+                    GPIO.output(relay, True)
 
 
         except Exception as err:
             self.log.error('Error while working with gpios')
             self.log.error(repr(err))
+            
+    def play_relay_1(self):
+        for i in range(0,10):
+            for r in self.ls_relays:
+                GPIO.output(r,False)
+                sleep(0.25)
+                GPIO.output(r,True)
+                sleep(0.25)
+        
+    def play_relay_2(self):
+        for i in range(0,10):
+            for r in self.ls_relays:
+                GPIO.output(r,False)
+                sleep(0.15)
+                GPIO.output(r,True)
+                sleep(0.1)
+            for r in self.ls_relays[::-1]:
+                GPIO.output(r,False)
+                sleep(0.15)
+                GPIO.output(r,True)
+                sleep(0.1)                
